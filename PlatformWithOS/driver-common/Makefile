@@ -6,8 +6,8 @@ SERVICE ?= initd
 
 include ../directories.mk
 
-PLATFORM ?= ../RasberryPi
-PANEL_VERSION ?= v231_g2
+PLATFORM ?= ../RaspberryPi
+PANEL_VERSION ?= V231_G2
 EPD_IO ?= epd_io.h
 
 FUSE_CFLAGS := $(shell pkg-config fuse --cflags)
@@ -20,7 +20,7 @@ ifeq (,$(strip ${EPD_DIR}))
 $(error unsupported PANEL_VERSION=${PANEL_VERSION})
 endif
 
-# set up toolchaion options
+# set up toolchain options
 CFLAGS += ${FUSE_CFLAGS}
 CFLAGS += -Wall -Werror -std=gnu99
 CFLAGS += -I${PLATFORM}
@@ -48,7 +48,7 @@ EPD_FUSE_SH = ${PLATFORM}/epd-fuse.sh
 check-compiled:
 	[ -e epd_fuse ] || false
 
-# install binary driver ans associated config/startup or service files
+# install binary driver and associated config/startup or service files
 .PHONY: install
 install: check-compiled
 	[ ! -d "${DESTDIR}${SBINDIR}" ] && mkdir -p "${DESTDIR}${SBINDIR}" || true
