@@ -23,8 +23,13 @@
 #define reset_pin     GPIO_P9_26
 #define busy_pin      GPIO_P9_27
 
+#if defined(__FreeBSD__)
+#define SPI_DEVICE    "/dev/spigen0"
+#define SPI_BPS       8000000
+#else
 #define SPI_DEVICE    "/dev/spidev1.0"
 //#define SPI_DEVICE    "/dev/spidev1.1"
 #define SPI_BPS       8000000
+#endif
 
 #endif

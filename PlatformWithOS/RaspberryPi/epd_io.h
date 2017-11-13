@@ -23,7 +23,13 @@
 #define reset_pin     GPIO_P1_18
 #define busy_pin      GPIO_P1_22
 
+#if defined(__FreeBSD__)
+#error "cannot use as this blocks the console serial port"
+#define SPI_DEVICE    "/dev/spigen0"
+#define SPI_BPS       8000000
+#else
 #define SPI_DEVICE    "/dev/spidev0.0"
 #define SPI_BPS       8000000
+#endif
 
 #endif

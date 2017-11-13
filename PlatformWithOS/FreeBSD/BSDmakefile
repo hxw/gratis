@@ -1,0 +1,100 @@
+# Makefile
+
+DESTIR ?= ""
+PREFIX ?= /usr/local
+
+include ../directories.mk
+
+PLATFORM ?= ../RaspberryPi
+DRIVER_COMMON ?= ../driver-common
+PANEL_VERSION ?= V231_G2
+EPD_IO ?= epd_io_free_uart.h
+
+FUSE_CFLAGS != pkg-config fuse --cflags
+FUSE_LDFLAGS != pkg-config fuse --libs
+
+# determine the epd.[ch] files path for the specific panel
+EPD_DIR = ${DRIVER_COMMON}/${PANEL_VERSION}
+
+.if ! exists(${EPD_DIR}/epd.h)
+.error unsupported PANEL_VERSION=${PANEL_VERSION}
+.endif
+
+# set up toolchain options
+CFLAGS += ${FUSE_CFLAGS}
+CFLAGS += -Wall -Werror -std=c99
+CFLAGS += -I${PLATFORM}
+CFLAGS += -I${EPD_DIR}
+CFLAGS += -I.
+CFLAGS += -I${DRIVER_COMMON}
+CFLAGS += -DEPD_IO='"${EPD_IO}"'
+
+LDFLAGS += ${FUSE_LDFLAGS}
+LDFLAGS += -lgpio
+LDFLAGS += -lrt
+
+RM = rm -f
+
+
+.PHONY: all
+all: gpio_test epd_test epd_fuse
+
+EPD_FUSE_CONF = ${PLATFORM}/epd-fuse.conf
+
+# abort if binary has not been built
+.PHONY: check-compiled
+check-compiled:
+	[ -e epd_fuse ] || false
+
+# paths to sources
+#.SUFFIXES: .h
+.PATH: .
+.PATH: ${PLATFORM}
+.PATH: ${EPD_DIR}
+.PATH: ${DRIVER_COMMON}
+
+
+# low-level driver
+DRIVER_OBJECTS = gpio.o spi.o epd.o
+GPIO_OBJECTS = gpio_test.o gpio.o
+FUSE_OBJECTS = epd_fuse.o ${DRIVER_OBJECTS}
+TEST_OBJECTS = epd_test.o ${DRIVER_OBJECTS}
+
+# build the fuse driver
+CLEAN_FILES += epd-fuse
+epd_fuse: ${FUSE_OBJECTS}
+	${CC} ${CFLAGS} ${LDFLAGS} -o "$@" ${FUSE_OBJECTS}
+
+
+# build simple GPIO test program
+CLEAN_FILES += gpio_test
+gpio_test: ${GPIO_OBJECTS}
+	${CC} ${CFLAGS} ${LDFLAGS} -o "$@" ${GPIO_OBJECTS}
+
+# build EPD test program
+CLEAN_FILES += epd_test
+epd_test: ${TEST_OBJECTS}
+	${CC} ${CFLAGS} ${LDFLAGS} -o "$@" ${TEST_OBJECTS}
+
+
+# dependencies
+gpio_test.o: gpio.h ${EPD_IO}
+epd_test.o: gpio.h ${EPD_IO} spi.h epd.h
+epd_fuse.o: gpio.h ${EPD_IO} spi.h epd.h
+
+gpio.o: gpio.h
+spi.o: spi.h
+epd.o: spi.h gpio.h epd.h
+
+
+# clean up
+.PHONY: clean
+clean:
+	${RM} ${CLEAN_FILES}
+	${RM} *.o *.pyc *~
+
+
+.PHONY: emacs-1
+emacs-1:
+	rsync -avHxP ~/repaper/gratis white-pi:
+	ssh white-pi -- make -C gratis/PlatformWithOS/FreeBSD
