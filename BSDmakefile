@@ -3,9 +3,13 @@
 DESTDIR ?= ""
 PREFIX ?= /usr/local
 
-
 PANEL_VERSION ?= NOT-SET
+
+.ifmake rpi || raspberrypi || rpi-install
+EPD_IO ?= epd_io_free_uart.h
+.else
 EPD_IO ?= epd_io.h
+.endif
 
 SUPPORTED_PANEL_VERSIONS = V231_G2
 
@@ -25,13 +29,11 @@ help:
 	@echo
 	@echo Raspberry Pi:
 	@echo '   $(MAKE) rpi            = build all targets'
-	@echo '   $(MAKE) rpi-install    = install fuse driver in PREFIX=${PREFIX} SERVICE=${SERVICE}'
-	@echo '   $(MAKE) rpi-T          = build only target T'
+	@echo '   $(MAKE) rpi-install    = install fuse driver in PREFIX=${PREFIX}'
 	@echo
 	@echo BeagleBone
 	@echo '   $(MAKE) bb             = build all targets'
-	@echo '   $(MAKE) bb-install     = install fuse driver in PREFIX=${PREFIX} SERVICE=${SERVICE}'
-	@echo '   $(MAKE) bb-T           = build only target T'
+	@echo '   $(MAKE) bb-install     = install fuse driver in PREFIX=${PREFIX}'
 	@echo
 	@echo Where T is one of:
 	@echo '    all install remove clean'
@@ -77,10 +79,11 @@ version-check:
 
 .PHONY: rpi raspberrypi
 rpi raspberrypi: version-check
-	$(MAKE) DESTDIR=$(DESTDIR) PREFIX=$(PREFIX) SERVICE=$(SERVICE) PLATFORM=../RaspberryPi PANEL_VERSION="${PANEL_VERSION}" EPD_IO="${EPD_IO}" -C PlatformWithOS/driver-common
+	$(MAKE) DESTDIR=${DESTDIR} PREFIX=${PREFIX} PLATFORM=../RaspberryPi PANEL_VERSION="${PANEL_VERSION}" EPD_IO="${EPD_IO}" -C PlatformWithOS/FreeBSD
 
-rpi-%: version-check
-	$(MAKE) DESTDIR=$(DESTDIR) PREFIX=$(PREFIX) SERVICE=$(SERVICE) PLATFORM=../RaspberryPi PANEL_VERSION="${PANEL_VERSION}" EPD_IO="${EPD_IO}" -C PlatformWithOS/driver-common $*
+.PHONY: rpi-install
+rpi-install: version-check
+	$(MAKE) DESTDIR=${DESTDIR} PREFIX=${PREFIX} PLATFORM=../RaspberryPi PANEL_VERSION="${PANEL_VERSION}" EPD_IO="${EPD_IO}" -C PlatformWithOS/FreeBSD install
 
 
 # BeagleBone Black targets
@@ -88,7 +91,8 @@ rpi-%: version-check
 
 .PHONY: bb beaglebone
 bb beaglebone: version-check
-	$(MAKE) DESTDIR=$(DESTDIR) PREFIX=$(PREFIX) PLATFORM=../BeagleBone PANEL_VERSION="${PANEL_VERSION}" EPD_IO="${EPD_IO}" -C PlatformWithOS/driver-common
+	$(MAKE) DESTDIR=$(DESTDIR) PREFIX=$(PREFIX) PLATFORM=../BeagleBone PANEL_VERSION="${PANEL_VERSION}" EPD_IO="${EPD_IO}" -C PlatformWithOS/FreeBSD
 
-bb-%: version-check
-	$(MAKE) DESTDIR=$(DESTDIR) PREFIX=$(PREFIX) PLATFORM=../BeagleBone PANEL_VERSION="${PANEL_VERSION}" EPD_IO="${EPD_IO}" -C PlatformWithOS/driver-common $*
+.PHONY: bb-install
+bb-install: version-check
+	$(MAKE) DESTDIR=$(DESTDIR) PREFIX=$(PREFIX) PLATFORM=../BeagleBone PANEL_VERSION="${PANEL_VERSION}" EPD_IO="${EPD_IO}" -C PlatformWithOS/FreeBSD install

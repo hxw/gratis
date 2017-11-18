@@ -153,4 +153,4 @@ to use:
 
     def _command(self, c):
         with open(os.path.join(self._epd_path, 'command'), 'wb') as f:
-            f.write(c)
+            f.write(c.encode('ASCII'))

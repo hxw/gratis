@@ -47,12 +47,13 @@ check-compiled:
 	[ -e epd_fuse ] || false
 
 # paths to sources
-#.SUFFIXES: .h
 .PATH: .
 .PATH: ${PLATFORM}
 .PATH: ${EPD_DIR}
 .PATH: ${DRIVER_COMMON}
 
+# compile in the current directory
+.OBJDIR: .
 
 # low-level driver
 DRIVER_OBJECTS = gpio.o spi.o epd.o
@@ -87,14 +88,13 @@ spi.o: spi.h
 epd.o: spi.h gpio.h epd.h
 
 
+# installation
+.PHONY: install
+install: epd_fuse
+	${INSTALL} epd_fuse ${DESTDIR}${PREFIX}/sbin
+
 # clean up
 .PHONY: clean
 clean:
 	${RM} ${CLEAN_FILES}
 	${RM} *.o *.pyc *~
-
-
-.PHONY: emacs-1
-emacs-1:
-	rsync -avHxP ~/repaper/gratis white-pi:
-	ssh white-pi -- make -C gratis/PlatformWithOS/FreeBSD

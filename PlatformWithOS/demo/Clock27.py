@@ -25,8 +25,9 @@ from EPD import EPD
 WHITE = 1
 BLACK = 0
 
-# fonts are in different places on Raspbian/Angstrom so search
+# fonts are in different places on Raspbian/Angstrom/Arch/FreeBSD so search
 possible_fonts = [
+    '/usr/local/share/fonts/dejavu/DejaVuSansMono-Bold.ttf',          # FreeBSD
     '/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf',            # Debian B.B
     '/usr/share/fonts/truetype/liberation/LiberationMono-Bold.ttf',   # Debian B.B
     '/usr/share/fonts/truetype/ttf-dejavu/DejaVuSansMono-Bold.ttf',   # R.Pi
